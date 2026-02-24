@@ -4,6 +4,8 @@ import { Dugme } from "../../components/Dugme";
 
 export default function KontaktPage() {
   const [forma, setForma] = useState({ ime: "", email: "", poruka: "" });
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
   const [status, setStatus] = useState<{
     tip: "uspeh" | "greska";
     tekst: string;
@@ -11,7 +13,7 @@ export default function KontaktPage() {
 
   const posaljiMejl = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:5000/api/kontakt", {
+    const res = await fetch(`${API_URL}/api/kontakt`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(forma),

@@ -17,6 +17,7 @@ export default function ProfilPage() {
   const [pretragaIndeksa, setPretragaIndeksa] = useState("");
   const isAdmin = Number(korisnik?.isAdmin) === 1;
   const jeSluzbenik = korisnik?.uloga === "sluzbenik" && !isAdmin;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   const ucitajAdminPodatke = async () => {
     const token = localStorage.getItem("token");
@@ -26,8 +27,8 @@ export default function ProfilPage() {
 
     try {
       const [resS, resSl] = await Promise.all([
-        fetch("http://localhost:5000/api/admin/studenti", { headers }),
-        fetch("http://localhost:5000/api/admin/sluzbenici", { headers }),
+        fetch(`${API_URL}/api/admin/studenti`, { headers }),
+        fetch(`${API_URL}/api/admin/sluzbenici`, { headers }),
       ]);
 
       const dataS = resS.ok ? await resS.json() : [];
@@ -43,7 +44,7 @@ export default function ProfilPage() {
   };
   const ucitajZaduzenja = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/zaduzenja/aktivna", {
+      const res = await fetch(`${API_URL}/api/zaduzenja/aktivna`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       if (res.ok) setSvaZaduzenja(await res.json());
@@ -54,7 +55,7 @@ export default function ProfilPage() {
 
   const handleRazduzi = async (id: number) => {
     if (!confirm("Potvrdi vraćanje?")) return;
-    const res = await fetch(`http://localhost:5000/api/razduzi/${id}`, {
+    const res = await fetch(`${API_URL}/api/razduzi/${id}`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
@@ -63,22 +64,17 @@ export default function ProfilPage() {
 
   const deaktiviraj = async (tip: string, id: number) => {
     if (!confirm(`Da li ste sigurni?`)) return;
-    const res = await fetch(
-      `http://localhost:5000/api/admin/brisi/${tip}/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      },
-    );
+    const res = await fetch(`${API_URL}/api/admin/brisi/${tip}/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
     if (res.ok) ucitajAdminPodatke();
   };
   const pretraziWiki = async () => {
     if (!wikiPojam) return;
     setWikiLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/eksterni/istrazi/${wikiPojam}`,
-      );
+      const res = await fetch(`${API_URL}/api/eksterni/istrazi/${wikiPojam}`);
       if (res.ok) {
         const data = await res.json();
         setWikiData(data);
@@ -102,7 +98,7 @@ export default function ProfilPage() {
     const postaviKorisnikaIZaduzenja = (k: any) => {
       setKorisnik(k);
       if (k.uloga === "student") {
-        fetch(`http://localhost:5000/api/zaduzenja/student/${k.id}`)
+        fetch(`${API_URL}/api/zaduzenja/student/${k.id}`)
           .then((res) => res.json())
           .then(setZaduzenja)
           .finally(() => setLoading(false));
@@ -119,7 +115,7 @@ export default function ProfilPage() {
       return;
     }
 
-    fetch("http://localhost:5000/api/me", {
+    fetch(`${API_URL}/api/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : null))
